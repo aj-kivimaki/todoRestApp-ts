@@ -1,33 +1,48 @@
 import { RequestHandler } from "express";
-import { Todo } from "../models/todo";
+import Todo, { TodoModel } from "../models/todoModel";
 
-const todos: Todo[] = [];
+export const createTodo: RequestHandler = async (req, res, next) => {
+  try {
+    const data: TodoModel = req.body;
+    const todo = await Todo.create(data);
 
-export const createTodo: RequestHandler = (req, res, next) => {
-  const text = (req.body as { text: string }).text;
-  const newTodo = new Todo(Math.random().toString(), text);
-  todos.push(newTodo);
-  res.status(201).json({ message: "Create the todo.", createTodo: newTodo });
+    return res
+      .status(201)
+      .json({ message: "Created the todo.", createdTodo: todo });
+  } catch (error: any) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-export const getTodos: RequestHandler = (req, res, next) => {
+export const getTodos: RequestHandler = async (req, res, next) => {
+  const todos = await Todo.find({});
   res.json({ todos: todos });
 };
 
-export const updateTodo: RequestHandler<{ id: string }> = (req, res, next) => {
-  const todoId = req.params.id;
-  const updatedText = (req.body as { text: string }).text;
-  const todoIndex = todos.findIndex((todo) => todo.id === todoId);
-  if (todoIndex < 0) throw new Error("Could not find todo!");
-  todos[todoIndex] = new Todo(todos[todoIndex].id, updatedText);
-  res.json({ message: "Updated!", updatedTodo: todos[todoIndex] });
+export const updateTodo: RequestHandler<{ id: string }> = async (
+  req,
+  res,
+  next
+) => {
+  const { id } = req.params;
+
+  const data: TodoModel = req.body;
+  const todo = await Todo.findByIdAndUpdate(id, data);
+
+  if (!todo) throw new Error("Could not find todo!");
+
+  res.json({ message: "Todo updated!", updatedTodo: data });
 };
 
-export const deleteTodo: RequestHandler<{ id: string }> = (req, res, next) => {
-  const todoId = req.params.id;
-  const todoIndex = todos.findIndex((todo) => todo.id === todoId);
-  if (todoIndex < 0) throw new Error("Could not find todo!");
+export const deleteTodo: RequestHandler<{ id: string }> = async (
+  req,
+  res,
+  next
+) => {
+  const { id } = req.params;
+  const todo = await Todo.findByIdAndDelete(id);
 
-  todos.splice(todoIndex, 1);
+  if (!todo) throw new Error("Could not find todo!");
+
   res.json({ message: "Todo deleted!" });
 };

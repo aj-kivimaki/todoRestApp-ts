@@ -26,7 +26,7 @@ tsconfig setup
 #### Dependencies
 
 - express
-- body-parser
+- body-parser (or use express.json())
 
 ```shell
 npm i --save express body-parser
