@@ -8,5 +8,6 @@ const createTodo = (req, res, next) => {
     const text = req.body.text;
     const newTodo = new todo_1.Todo(Math.random().toString(), text);
     todos.push(newTodo);
+    res.status(201).json({ message: "Create the todo.", createTodo: newTodo });
 };
 exports.createTodo = createTodo;
